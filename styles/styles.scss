@@ -1,3 +1,7 @@
+@import "./_Home";
+@import "./common";
+@import "~bootstrap/scss/bootstrap";
+
 html,
 body {
   padding: 0;
@@ -13,6 +17,11 @@ a {
 
 * {
   box-sizing: border-box;
+}
+
+p {
+  display: inline;
+  margin: 0;
 }
 
 @media (prefers-color-scheme: dark) {
