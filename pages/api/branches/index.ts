@@ -15,6 +15,9 @@ export default async function handler(
   if (req.method === "POST") {
     branch = await createBranch(req.body.branchData);
   }
+  if (req.method === "PATCH") {
+    // branch = await createBranch(req.body.branchData);
+  }
   return res.status(200).json(branch);
 }
 

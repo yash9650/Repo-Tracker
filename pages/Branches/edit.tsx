@@ -4,6 +4,8 @@ import Form from "react-bootstrap/Form";
 import { useForm } from "react-hook-form";
 import appAxios from "../../axios/AppAxios";
 import Select from "react-select";
+import { useRouter } from "next/router";
+import { IBranch } from "../../models/Branch";
 
 const defaultValues = {
   branchName: "",
@@ -17,7 +19,9 @@ const defaultValues = {
   repository: "",
 };
 
-const editBranchPage: NextPage = () => {
+const editBranchPage: NextPage<{
+  branchData: IBranch;
+}> = (props) => {
   const [showFormModal, setShowFormModal] = useState(false);
   const [repositoriesOptArr, setRepositoriesOptArr] = useState<
     [
@@ -27,6 +31,8 @@ const editBranchPage: NextPage = () => {
       }
     ]
   >();
+  const router = useRouter();
+
   const { register, handleSubmit, getValues, setValue, reset, watch } =
     useForm<{
       branchName: string;
@@ -53,12 +59,14 @@ const editBranchPage: NextPage = () => {
     if (!formData.isDeleted) {
       formData.deletedAt = undefined;
     }
+    console.log(router.query._id);
 
     // try {
     //   const res = await appAxios({
-    //     method: "POST",
+    //     method: "PATCH",
     //     url: "/api/branches",
     //     data: {
+    //       branchId: "",
     //       branchData: formData,
     //     },
     //   });
@@ -89,6 +97,7 @@ const editBranchPage: NextPage = () => {
 
   useEffect(() => {
     getRepo();
+    reset(props.branchData);
   }, []);
 
   const watchForm = watch();
@@ -169,6 +178,24 @@ const editBranchPage: NextPage = () => {
       </Form.Group>
     </Form>
   );
+};
+
+export const getServerSideProps = async (context) => {
+  try {
+    const _id = context.query._id;
+    const branch = await appAxios(`/api/branches/${_id}`);
+    return {
+      props: {
+        branchData: branch.data,
+      },
+    };
+  } catch (error) {
+    console.log(error);
+
+    return {
+      props: {},
+    };
+  }
 };
 
 export default editBranchPage;
