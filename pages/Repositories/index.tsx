@@ -12,7 +12,8 @@ import { IRepo } from "../../models/Repository";
 import { Card } from "react-bootstrap";
 import moment from "moment";
 import { useRouter } from "next/router";
-import appAxios from "../../axios/AppAxios";
+import appAxios, { AppAxiosResponse } from "../../axios/AppAxios";
+import { getCookies, setCookie } from "cookies-next";
 
 const RepositoriesPage: NextPage<{
   repoList: IRepo[];
@@ -68,17 +69,20 @@ const RepositoriesPage: NextPage<{
   );
 };
 
-export const getStaticProps: GetStaticProps = async (context) => {
+export const getServerSideProps: GetServerSideProps = async (context) => {
   try {
-    const repoResponse = await fetch("http://localhost:3000/api/repositories");
-    const repoList = await repoResponse.json();
-    return {
-      props: {
-        repoList,
-      },
-    };
+    const repoResponse: AppAxiosResponse<[IRepo]> = await appAxios(
+      "api/repositories"
+    );
+    if (repoResponse.data.success) {
+      return {
+        props: {
+          repoList: repoResponse.data.data,
+        },
+      };
+    }
   } catch (error) {
-    console.log(error);
+    console.log(error.response.data);
   }
   return {
     props: {
@@ -97,20 +101,6 @@ export const getStaticProps: GetStaticProps = async (context) => {
 //   //     role: "admin",
 //   //   },
 //   // });
-//   try {
-//     const user = await appAxios({
-//       url: "/api/auth/login",
-//       method: "POST",
-//       data: {
-//         username: "testt",
-//         password: "password2",
-//         role: "admin",
-//       },
-//     });
-//     console.log(user.data);
-//   } catch (error) {
-//     console.log(error.response.data.error);
-//   }
 
 //   return {
 //     props: {
@@ -120,3 +110,23 @@ export const getStaticProps: GetStaticProps = async (context) => {
 // };
 
 export default RepositoriesPage;
+
+// ----> login logic
+// try {
+//   const loginResponse: AppAxiosResponse = await appAxios({
+//     url: "/api/cookie",
+//     method: "POST",
+//     data: {
+//       username: "Yash",
+//       password: "password",
+//     },
+//   });
+//   // setCookie("auth", loginResponse.data.data, {
+//   //   res: context.res,
+//   //   req: context.req,
+//   //   httpOnly: true,
+//   //   secure: process.env.NODE_ENV !== "development",
+//   //   sameSite: "strict",
+//   //   path: "/",
+//   // });
+// } catch (error) {}

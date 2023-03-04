@@ -7,12 +7,11 @@ import {
   NextPage,
 } from "next";
 import CustomCard from "../../components/common/CustomCard";
-import AddOrEditBranchInRepoForm from "../../components/Repositories/AddOrEditBranchInRepoForm";
 import { IRepo } from "../../models/Repository";
 import { Card } from "react-bootstrap";
 import moment from "moment";
 import { useRouter } from "next/router";
-import appAxios from "../../axios/AppAxios";
+import appAxios, { AppAxiosResponse } from "../../axios/AppAxios";
 import { IBranch } from "../../models/Branch";
 
 const RepositoryDetailPage: NextPage<{
@@ -23,7 +22,7 @@ const RepositoryDetailPage: NextPage<{
   return (
     <React.Fragment>
       <div className="container">
-        {props.repoData.branches.map((branch, index) => (
+        {props.repoData.branches?.map((branch, index) => (
           <CustomCard key={index}>
             <div className="custom-card-container">
               <div
@@ -36,7 +35,7 @@ const RepositoryDetailPage: NextPage<{
                 <Card.Body>
                   <div>
                     <b>Created by: </b>
-                    <p> {branch.createdBy} </p>
+                    <p> {branch.createdBy?.toString()} </p>
                     <b>Created at: </b>
                     {moment(branch.createdAt).format("LL")}
                   </div>
@@ -46,7 +45,12 @@ const RepositoryDetailPage: NextPage<{
                 <button
                   className="btn btn-primary fs-small"
                   onClick={() => {
-                    setEditBranchDetails(branch);
+                    router.push({
+                      pathname: "/Branches/edit",
+                      query: {
+                        _id: branch._id.toString(),
+                      },
+                    });
                   }}
                 >
                   edit
@@ -63,19 +67,12 @@ const RepositoryDetailPage: NextPage<{
           </CustomCard>
         ))}
       </div>
-      <AddOrEditBranchInRepoForm
-        repoId={router.query.repoId}
-        branchData={editBranchDetails}
-        resetBranchDate={() => {
-          setEditBranchDetails(null);
-        }}
-      />
     </React.Fragment>
   );
 };
 export const getStaticPaths: GetStaticPaths = async (context) => {
   const repoList = await appAxios("/api/repositories");
-  const paths = repoList.data.map((repo) => {
+  const paths = repoList.data.data.map((repo) => {
     return {
       params: { repoId: repo._id },
     };
@@ -86,20 +83,18 @@ export const getStaticPaths: GetStaticPaths = async (context) => {
 
 export const getStaticProps: GetStaticProps = async (context) => {
   try {
-    const repoData = await appAxios({
-      url: `http://localhost:3000/api/repositories/${context.params.repoId}`,
-      //   params: {
-      //     _id: context.params.repoId,
-      //   },
-    });
-    return {
-      props: {
-        repoData: repoData.data,
-      },
-    };
-  } catch (error) {
-    console.log(error);
-  }
+    const repoResponse: AppAxiosResponse<IRepo> = await appAxios(
+      `/api/repositories/${context.params.repoId}`
+    );
+    if (repoResponse.data.success) {
+      return {
+        props: {
+          repoData: repoResponse.data.data,
+        },
+        revalidate: 3000,
+      };
+    }
+  } catch (error) {}
   return {
     props: {
       repoData: [],

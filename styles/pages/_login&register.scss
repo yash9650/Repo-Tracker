@@ -1,0 +1,24 @@
+.login-register-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 90vh;
+  background-image: url("https://t3.ftcdn.net/jpg/03/55/60/70/360_F_355607062_zYMS8jaz4SfoykpWz5oViRVKL32IabTP.jpg");
+  background-repeat: no-repeat;
+  background-size: cover;
+
+  .login-register-form {
+    border: 2.5px solid rgb(183, 183, 207, 49%);
+    padding: 2rem;
+    background-color: #ffffff66;
+    box-shadow: 10px 5px 5px rgba(193, 207, 216, 0.911);
+    border-radius: 1rem;
+
+    .new-user-btn {
+      &:hover {
+        text-decoration: underline;
+        cursor: pointer;
+      }
+    }
+  }
+}

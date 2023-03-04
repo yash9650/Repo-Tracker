@@ -2,27 +2,40 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import dbconnect from "../../../utils/dbconnect";
 import Repository, { IRepo } from "../../../models/Repository";
 import Branch, { IBranch } from "../../../models/Branch";
+import {
+  emptyResponse,
+  errorResponse,
+  successResponse,
+} from "../../../utils/resposneFx";
+import { verifyUser } from "../../../utils/authFx";
 
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
   await dbconnect();
+  const jsonResponse = { ...emptyResponse };
   try {
-    let repo;
-
     if (req.method === "GET") {
-      repo = await Repository.find();
+      jsonResponse.data = await Repository.find();
     }
     if (req.method === "POST") {
-      repo = await createRepo(req.body);
+      jsonResponse.data = await createRepo(req.body);
     }
     if (req.method === "PATCH") {
-      repo = await addBranchInRepo(req.body.repoId, req.body.branchData);
+      jsonResponse.data = await addBranchInRepo(
+        req.body.repoId,
+        req.body.branchData
+      );
     }
-    return res.status(200).json(repo);
+    jsonResponse.success = true;
+    jsonResponse.error = null;
+    return successResponse(res, jsonResponse);
   } catch (error) {
-    console.log(error);
+    jsonResponse.error = error;
+    jsonResponse.errorMessage =
+      error.errorMessage || error.name || "Something went wrong!!";
+    return errorResponse(res, jsonResponse);
   }
 }
 

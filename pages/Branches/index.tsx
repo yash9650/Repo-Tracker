@@ -5,12 +5,33 @@ import { IBranch } from "../../models/Branch";
 import { useRouter } from "next/router";
 import { Card } from "react-bootstrap";
 import moment from "moment";
-import AddOrEditBranchForm from "../../components/Branches/AddOrEditBranchForm";
+import AddOrEditBranchForm from "../../components/Branches/AddBranchForm";
+import appAxios, { AppAxiosResponse } from "../../axios/AppAxios";
 
 const BranchesListPage: NextPage<{
   branchList: IBranch[];
 }> = (props) => {
   const router = useRouter();
+
+  const refreshPage = () => {
+    router.replace(router.asPath);
+  };
+
+  const deleteBranch = async (branchId) => {
+    const deleteConfirm = prompt("Are you sure?");
+    if (deleteConfirm) {
+      const deleteBranchRes: AppAxiosResponse = await appAxios({
+        url: "/api/branches",
+        method: "DELETE",
+        data: {
+          branchId,
+        },
+      });
+      if (deleteBranchRes.data.success) {
+        refreshPage();
+      }
+    }
+  };
 
   return (
     <>
@@ -48,7 +69,7 @@ const BranchesListPage: NextPage<{
                 <br />
                 <button
                   className="btn btn-danger fs-small"
-                  onClick={(event) => {}}
+                  onClick={() => deleteBranch(branch._id)}
                 >
                   del
                 </button>
@@ -57,20 +78,27 @@ const BranchesListPage: NextPage<{
           </CustomCard>
         ))}
       </div>
-      <AddOrEditBranchForm />
+      <AddOrEditBranchForm
+        refreshOnSave={() => {
+          refreshPage();
+        }}
+      />
     </>
   );
 };
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   try {
-    const branchResponse = await fetch("http://localhost:3000/api/branches");
-    const branchList = await branchResponse.json();
-    return {
-      props: {
-        branchList,
-      },
-    };
+    const branchResponse: AppAxiosResponse<[IBranch]> = await appAxios(
+      "http://localhost:3000/api/branches"
+    );
+    if (branchResponse.data.success) {
+      return {
+        props: {
+          branchList: branchResponse.data.data,
+        },
+      };
+    }
   } catch (error) {
     console.log(error);
   }

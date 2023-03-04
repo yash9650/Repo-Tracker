@@ -5,12 +5,13 @@ import { IRepo } from "./Repository";
 import passportLocalMongoose from "passport-local-mongoose";
 
 export enum Role {
-  "admin",
-  "developer",
-  "tester",
+  ADMIN = "admin",
+  DEVELOPER = "developer",
+  TESTER = "tester",
 }
 
 export interface IUser {
+  _id: mongoose.Types.ObjectId;
   username: string;
   password: any;
   role: string;
@@ -47,7 +48,7 @@ const userSchema = new mongoose.Schema<IUser>({
 userSchema.plugin(passportLocalMongoose);
 
 const User =
-  (mongoose.models.User as mongoose.Model<IUser>) ||
+  (mongoose.models?.User as mongoose.Model<IUser>) ||
   mongoose.model("User", userSchema);
 
 export default User;

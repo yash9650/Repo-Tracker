@@ -18,7 +18,7 @@ const Home: NextPage<{
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <div className="container">
-        {props.repoList.map((repo, index) => (
+        {/* {props.repoList.map((repo, index) => (
           <CustomCard key={index} url={`/${repo._id}`}>
             <Card.Title>{repo.repoName}</Card.Title>
             <Card.Text>
@@ -26,7 +26,7 @@ const Home: NextPage<{
               {moment(repo.createdAt).format("LL")}
             </Card.Text>
           </CustomCard>
-        ))}
+        ))} */}
       </div>
       <AddNewRepositoryForm />
     </>
